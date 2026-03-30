@@ -141,7 +141,7 @@ class SurveyJsServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-//            'create_survey-js_table',
+            'create_survey_js_versions_table',
         ];
     }
 }

@@ -11,6 +11,7 @@
             surveyJson: @js($field->getSurveyJson()),
             panelless: @js($field->panelless),
             transparent: @js($field->transparent),
+            statePath: @js($getStatePath()),
         })"
     >
         <template x-if="loading">

@@ -1,0 +1,25 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('survey_js_versions', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('versionable');
+            $table->string('field_name');
+            $table->json('data');
+            $table->boolean('completed')->default(false);
+            $table->timestamp('created_at')->useCurrent();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('survey_js_versions');
+    }
+};
