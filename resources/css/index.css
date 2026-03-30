@@ -1,1 +1,32 @@
-@import '../../vendor/filament/filament/resources/css/theme.css';
+@import 'survey-core/survey-core.fontless.css';
+@import 'survey-creator-core/survey-creator-core.fontless.css';
+
+/* Filament-style checkbox/radio ring */
+.sd-item__decorator {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-950) 10%, transparent),
+        inset 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.dark .sd-item__decorator {
+    background-color: color-mix(in oklab, var(--color-white, #fff) 5%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-white, #fff) 20%, transparent),
+        inset 0px 1px 2px 0px rgba(0, 0, 0, 0.15);
+}
+
+.sd-item--checked .sd-item__decorator {
+    box-shadow: none;
+}
+
+.sd-item__control:focus + .sd-item__decorator {
+    box-shadow: 0 0 0 2px var(--sjs-primary-backcolor, var(--primary-600));
+}
+
+.sd-item--allowhover:not(.sd-item--readonly) .sd-selectbase__label:hover .sd-item__decorator {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-950) 15%, transparent),
+        inset 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.dark .sd-item--allowhover:not(.sd-item--readonly) .sd-selectbase__label:hover .sd-item__decorator {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-white, #fff) 30%, transparent),
+        inset 0px 1px 2px 0px rgba(0, 0, 0, 0.15);
+}
