@@ -1,8 +1,39 @@
 import * as Survey from 'survey-core'
-import 'survey-js-ui'
+import * as SurveyUI from 'survey-js-ui'
 import { light, dark } from './filament-theme'
 
-export default function surveyjsForm({ state: initialState, surveyJson, panelless, transparent, statePath }) {
+// Enregistrement du composant "barre de progression en pourcentage"
+// Compatible survey-js-ui (VanillaJS) via l'API ReactElementFactory
+Survey.Serializer.addProperty('survey', 'progressTitle')
+const h = SurveyUI.createElement
+window.React = window.React || { createElement: h }
+
+class PercentageProgressBar extends SurveyUI.ReactSurveyElement {
+    render() {
+        const model = this.props.model
+        return h('div', { className: 'sv-progressbar-percentage' },
+            model.progressTitle && h('div', { className: 'sv-progressbar-percentage__title' },
+                h('span', null, model.progressTitle),
+            ),
+            h('div', { className: 'sv-progressbar-percentage__indicator' },
+                model.progressValue > 0 && h('div', {
+                    className: 'sv-progressbar-percentage__value-bar',
+                    style: { width: model.progressValue + '%' },
+                }),
+            ),
+            h('div', { className: 'sv-progressbar-percentage__value' },
+                h('span', null, model.progressValue + '%'),
+            ),
+        )
+    }
+}
+
+SurveyUI.ReactElementFactory.Instance.registerElement(
+    'sv-progressbar-percentage',
+    (props) => h(PercentageProgressBar, props),
+)
+
+export default function surveyjsForm({ state: initialState, surveyJson, panelless, transparent, statePath, readOnly, progressBarPercent }) {
     let survey = null
     const UI_KEY = `surveyjs_ui_${statePath}`
 
@@ -14,12 +45,33 @@ export default function surveyjsForm({ state: initialState, surveyJson, panelles
         survey.applyTheme(theme)
     }
 
-    return {
+    function updatePageState(component) {
+        component.isFirstPage = survey.isFirstPage
+        component.isLastPage = survey.isLastPage
+    }
+
+return {
         state: initialState,
         loading: true,
+        isFirstPage: true,
+        isLastPage: false,
+        readOnly: readOnly ?? false,
 
         init() {
             survey = new Survey.Model(surveyJson)
+
+            // Masquer la navigation native SurveyJS (remplacée par les boutons Filament)
+            survey.showNavigationButtons = false
+
+            // Barre de progression en pourcentage (layout element custom)
+            if (progressBarPercent) {
+                survey.addLayoutElement({
+                    id: 'progressbar-percentage',
+                    component: 'sv-progressbar-percentage',
+                    container: 'contentTop',
+                    data: survey,
+                })
+            }
 
             // Pré-remplir le survey avec les données existantes depuis le state Filament
             if (this.state && typeof this.state === 'object' && Object.keys(this.state).length > 0) {
@@ -37,11 +89,17 @@ export default function surveyjsForm({ state: initialState, surveyJson, panelles
             this.$nextTick(() => {
                 survey.render(this.$refs.surveyContainer)
                 this.loading = false
+                updatePageState(this)
             })
 
             // Sync vers le state Livewire à chaque changement de valeur
             survey.onValueChanged.add(() => {
                 this.state = survey.data
+            })
+
+            // Mise à jour de l'état de navigation au changement de page
+            survey.onCurrentPageChanged.add(() => {
+                updatePageState(this)
             })
 
             // Persister la position de page (page courante, questions ouvertes…)
@@ -63,6 +121,18 @@ export default function surveyjsForm({ state: initialState, surveyJson, panelles
                     applyTheme(mode)
                 })
             })
+        },
+
+        nextPage() {
+            survey.nextPage()
+        },
+
+        prevPage() {
+            survey.prevPage()
+        },
+
+        completeSurvey() {
+            survey.tryComplete()
         },
     }
 }

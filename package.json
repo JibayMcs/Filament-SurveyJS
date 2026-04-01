@@ -8,5 +8,10 @@
     "devDependencies": {
         "esbuild": "^0.25.5",
         "prettier": "^3.5.3"
+    },
+    "dependencies": {
+        "survey-core": "^2.5.17",
+        "survey-creator-core": "^2.5.17",
+        "survey-js-ui": "^2.5.17"
     }
 }

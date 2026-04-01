@@ -45,8 +45,24 @@ const defaultOptions = {
 
 compile({
     ...defaultOptions,
-    entryPoints: ['./resources/js/index.js'],
-    outfile: './resources/dist/skeleton.js',
+    entryPoints: ['./resources/js/index-form.js'],
+    outfile: './resources/dist/survey-js-form.js',
 }).then(() => {
-    console.log(`Build completed for skeleton.js`)
+    console.log(`Build completed for survey-js-form.js`)
+})
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/index-creator.js'],
+    outfile: './resources/dist/survey-js-creator.js',
+}).then(() => {
+    console.log(`Build completed for survey-js-creator.js`)
+})
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/css/index.css'],
+    outfile: './resources/dist/survey.css',
+}).then(() => {
+    console.log(`Build completed for survey.css`)
 })

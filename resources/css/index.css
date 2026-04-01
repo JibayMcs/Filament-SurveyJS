@@ -1,6 +1,9 @@
 @import 'survey-core/survey-core.fontless.css';
 @import 'survey-creator-core/survey-creator-core.fontless.css';
 
+/* Masque les éléments Alpine avant initialisation — évite tout flash de contenu */
+[x-cloak] { display: none !important; }
+
 /* Filament-style checkbox/radio ring */
 .sd-item__decorator {
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-950) 10%, transparent),
@@ -29,4 +32,71 @@
 .dark .sd-item--allowhover:not(.sd-item--readonly) .sd-selectbase__label:hover .sd-item__decorator {
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-white, #fff) 30%, transparent),
         inset 0px 1px 2px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* Percentage progress bar */
+.sv-progressbar-percentage {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    line-height: 32px;
+    margin-bottom: 24px;
+    justify-content: center;
+    align-items: center;
+    color: var(--sjs-font-questiontitle-color, var(--sjs-general-forecolor, var(--foreground, #161616)));
+}
+
+.sv-progressbar-percentage__title {
+    font-size: 20px;
+    display: flex;
+    white-space: nowrap;
+}
+
+.sv-progressbar-percentage__indicator {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 50%;
+    border-radius: 9999px;
+    background: var(--gray-200);
+    height: 8px;
+}
+
+.dark .sv-progressbar-percentage__indicator {
+    background: var(--gray-700);
+}
+
+.sv-progressbar-percentage__value-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 9999px;
+    border: 1px solid var(--sjs-primary-backcolor, #19b394);
+    background: var(--sjs-primary-backcolor, #19b394);
+    height: 8px;
+    transition: width 0.3s ease;
+}
+
+.sv-progressbar-percentage__value {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading,var(--text-sm--line-height));
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-500);
+}
+
+/* Navigation buttons */
+.sjs-navigation {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.sjs-navigation__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
 }
