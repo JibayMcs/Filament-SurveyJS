@@ -15,6 +15,8 @@ trait HasSurveyDisplay
 
     public ?bool $progressBarPercent = false;
 
+    protected string|array|null $progressBarColor = null;
+
     protected ?ProgressBarLocation $progressBarLocation = null;
 
     protected ?bool $autoAdvanceEnabled = false;
@@ -43,12 +45,18 @@ trait HasSurveyDisplay
         return $this;
     }
 
-    public function showProgressBar(?bool $condition = true, bool $hasPercent = false): static
+    public function showProgressBar(?bool $condition = true, bool $hasPercent = false, string|array $color = 'primary'): static
     {
         $this->showProgressBar = $condition;
         $this->progressBarPercent = $condition ? $hasPercent : false;
+        $this->progressBarColor = $condition ? $color : null;
 
         return $this;
+    }
+
+    public function getProgressBarColorHex(): ?string
+    {
+        return $this->resolveColorHex($this->progressBarColor);
     }
 
     public function progressBarLocation(ProgressBarLocation $location): static

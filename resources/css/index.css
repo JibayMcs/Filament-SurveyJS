@@ -70,14 +70,19 @@
     left: 0;
     top: 0;
     border-radius: 9999px;
-    border: 1px solid var(--sjs-primary-backcolor, #19b394);
-    background: var(--sjs-primary-backcolor, #19b394);
+    border: 1px solid var(--sjs-progress-bar-color, var(--sjs-primary-backcolor, #19b394));
+    background: var(--sjs-progress-bar-color, var(--sjs-primary-backcolor, #19b394));
     height: 8px;
     transition: width 0.3s ease;
 }
 
 .sv-progressbar-percentage__value {
     @apply text-sm font-medium text-gray-500;
+}
+
+/* Override couleur barre de progression native SurveyJS quand --sjs-progress-bar-color est defini */
+[style*="--sjs-progress-bar-color"] .sd-progress__bar {
+    background-color: var(--sjs-progress-bar-color) !important;
 }
 
 /* Navigation buttons */

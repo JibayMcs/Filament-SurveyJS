@@ -60,6 +60,7 @@ export default function surveyjsForm({
     fileDownloadUrl,
     fileDeleteUrl,
     fileErrors,
+    progressBarColor,
     licenseKey,
 }) {
     let survey = null
@@ -261,6 +262,11 @@ export default function surveyjsForm({
             }
 
             applyTheme(Alpine.store('theme'))
+
+            // Appliquer la couleur de la barre de progression via CSS variable
+            if (progressBarColor) {
+                this.$el.style.setProperty('--sjs-progress-bar-color', progressBarColor)
+            }
 
             this.$nextTick(() => {
                 survey.render(this.$refs.surveyContainer)

@@ -4,9 +4,9 @@ namespace JibayMcs\SurveyJs\Forms\Concerns;
 
 trait HasSurveyNavigation
 {
-    protected ?bool $showNavigationButtons = null;
+    public ?bool $showNavigationButtons = null;
 
-    protected ?bool $showPrevButton = null;
+    public ?bool $showPrevButton = null;
 
     public ?string $pageNextText = null;
 
@@ -20,9 +20,14 @@ trait HasSurveyNavigation
 
     public string $completeButtonColor = 'success';
 
-    public function showNavigationButtons(?bool $condition = true): static
+    public function showNavigationButtons(?bool $condition = true, bool $autoAdvance = true): static
     {
         $this->showNavigationButtons = $condition;
+
+        if (! $condition && $autoAdvance) {
+            $this->autoAdvanceEnabled = true;
+            $this->autoAdvanceAllowComplete = true;
+        }
 
         return $this;
     }

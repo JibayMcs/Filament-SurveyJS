@@ -2,9 +2,6 @@
 
 namespace JibayMcs\SurveyJs\Forms\Concerns;
 
-use Filament\Support\Facades\FilamentColor;
-use Throwable;
-
 trait HasSurveySignature
 {
     protected string|array|null $signaturePenColor = 'black';
@@ -16,35 +13,10 @@ trait HasSurveySignature
         return $this;
     }
 
-    protected function resolveSignaturePenColorHex(): ?string
-    {
-        if ($this->signaturePenColor === null) {
-            return null;
-        }
-
-        if ($this->signaturePenColor === 'primary') {
-            try {
-                $colors = FilamentColor::getColors();
-                return $colors['primary'][600] ?? $colors['primary']['600'] ?? '#6d28d9';
-            } catch (Throwable) {
-                return '#6d28d9';
-            }
-        }
-
-        if (is_array($this->signaturePenColor)) {
-            return $this->signaturePenColor[600]
-                ?? $this->signaturePenColor['600']
-                ?? $this->signaturePenColor[500]
-                ?? $this->signaturePenColor['500']
-                ?? array_values($this->signaturePenColor)[0];
-        }
-
-        return $this->signaturePenColor;
-    }
-
     protected function applySignaturePenColor(array $json): array
     {
-        $color = $this->resolveSignaturePenColorHex();
+        $color = $this->resolveColorHex($this->signaturePenColor);
+
         if ($color === null) {
             return $json;
         }

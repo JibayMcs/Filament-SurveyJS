@@ -48,6 +48,19 @@ class SurveyJSCreatorField extends Field
                     'record' => $component->getRecord(),
                 ]);
             }
+
+            $record = $component->getRecord();
+
+            if ($component->versioningEnabled && $record) {
+                SurveyJsVersion::create([
+                    'versionable_type' => $record->getMorphClass(),
+                    'versionable_id' => $record->getKey(),
+                    'field_name' => $component->getStatePath(),
+                    'data' => $json,
+                    'completed' => false,
+                    'created_at' => now(),
+                ]);
+            }
         });
     }
 }

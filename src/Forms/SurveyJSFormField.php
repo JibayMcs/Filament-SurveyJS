@@ -10,6 +10,7 @@ use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyJson;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyNavigation;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyPersistence;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveySignature;
+use JibayMcs\SurveyJs\Forms\Concerns\ResolvesColors;
 use JibayMcs\SurveyJs\Models\SurveyJsVersion;
 
 class SurveyJSFormField extends Field
@@ -21,6 +22,7 @@ class SurveyJSFormField extends Field
     use HasSurveyNavigation;
     use HasSurveyPersistence;
     use HasSurveySignature;
+    use ResolvesColors;
 
     protected string $view = 'survey-js::components.surveyjs-form-field';
 

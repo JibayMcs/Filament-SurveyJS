@@ -31,6 +31,16 @@ trait HasCreatorOptions
 
     protected ?bool $readOnly = null;
 
+    protected ?string $toolboxLocation = null;
+
+    protected ?bool $toolboxCompact = null;
+
+    protected ?bool $toolboxSearchEnabled = null;
+
+    protected ?bool $toolboxShowCategoryTitles = null;
+
+    protected ?bool $versioningEnabled = null;
+
     protected ?Closure $onModifiedCallback = null;
 
     protected ?Closure $onSaveCallback = null;
@@ -126,6 +136,54 @@ trait HasCreatorOptions
         return $this;
     }
 
+    public function toolboxLocation(string $location): static
+    {
+        $this->toolboxLocation = $location;
+
+        return $this;
+    }
+
+    public function toolboxCompact(?bool $condition = true): static
+    {
+        $this->toolboxCompact = $condition;
+
+        return $this;
+    }
+
+    public function toolboxSearchEnabled(?bool $condition = true): static
+    {
+        $this->toolboxSearchEnabled = $condition;
+
+        return $this;
+    }
+
+    public function toolboxShowCategoryTitles(?bool $condition = true): static
+    {
+        $this->toolboxShowCategoryTitles = $condition;
+
+        return $this;
+    }
+
+    public function versioning(?bool $condition = true): static
+    {
+        $this->versioningEnabled = $condition;
+
+        if ($condition) {
+            $this->live(debounce: 500);
+        }
+
+        return $this;
+    }
+
+    public function getToolboxOptions(): array
+    {
+        return array_filter([
+            'forceCompact' => $this->toolboxCompact,
+            'searchEnabled' => $this->toolboxSearchEnabled,
+            'showCategoryTitles' => $this->toolboxShowCategoryTitles,
+        ], fn ($value) => $value !== null);
+    }
+
     public function onModified(?Closure $callback): static
     {
         $this->onModifiedCallback = $callback;
@@ -154,6 +212,7 @@ trait HasCreatorOptions
             'autoSaveEnabled' => $this->autoSaveEnabled,
             'autoSaveDelay' => $this->autoSaveDelay,
             'readOnly' => $this->readOnly,
+            'toolboxLocation' => $this->toolboxLocation,
         ], fn ($value) => $value !== null);
     }
 }

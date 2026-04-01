@@ -8,6 +8,7 @@ export default function surveyjsCreator({
     state: initialState,
     statePath,
     options,
+    toolboxOptions,
     locale,
     licenseKey,
 }) {
@@ -36,6 +37,13 @@ export default function surveyjsCreator({
             creator = new SurveyCreator(options)
 
             if (locale) creator.locale = locale
+
+            // Appliquer les options de toolbox (post-creation)
+            if (toolboxOptions) {
+                if (toolboxOptions.forceCompact !== undefined) creator.toolbox.forceCompact = toolboxOptions.forceCompact
+                if (toolboxOptions.searchEnabled !== undefined) creator.toolbox.searchEnabled = toolboxOptions.searchEnabled
+                if (toolboxOptions.showCategoryTitles !== undefined) creator.toolbox.showCategoryTitles = toolboxOptions.showCategoryTitles
+            }
 
             // Charger le JSON existant depuis le state Filament
             if (

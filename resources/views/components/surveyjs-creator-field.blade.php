@@ -10,6 +10,7 @@
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$getStatePath()}')") }},
             statePath: @js($getStatePath()),
             options: @js($field->getCreatorOptions()),
+            toolboxOptions: @js($field->getToolboxOptions()),
             locale: @js($field->getLocale()),
             licenseKey: @js(config('survey-js.license_key')),
         })"
