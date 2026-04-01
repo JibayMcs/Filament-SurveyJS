@@ -25,6 +25,7 @@
                 'invalidType' => __('survey-js::survey-js.upload.invalid_type'),
                 'failed' => __('survey-js::survey-js.upload.failed'),
             ]),
+            licenseKey: @js(config('survey-js.license_key')),
         })"
         wire:ignore
     >

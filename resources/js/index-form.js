@@ -1,4 +1,5 @@
 import * as Survey from 'survey-core'
+import { setLicenseKey } from 'survey-core'
 import 'survey-core/survey.i18n'
 import * as SurveyUI from 'survey-js-ui'
 import { dark, light } from './filament-theme'
@@ -59,6 +60,7 @@ export default function surveyjsForm({
     fileDownloadUrl,
     fileDeleteUrl,
     fileErrors,
+    licenseKey,
 }) {
     let survey = null
     const UI_KEY = `surveyjs_ui_${statePath}`
@@ -89,6 +91,8 @@ export default function surveyjsForm({
         surveyTitle: '',
 
         init() {
+            if (licenseKey) setLicenseKey(licenseKey)
+
             survey = new Survey.Model(surveyJson)
 
             // Appliquer la locale pour les textes d'interface SurveyJS

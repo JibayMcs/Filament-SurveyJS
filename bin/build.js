@@ -59,6 +59,11 @@ compile({
     ...defaultOptions,
     entryPoints: ['./resources/js/index-creator.js'],
     outfile: './resources/dist/survey-js-creator.js',
+    alias: {
+        'react': 'survey-js-ui',
+        'react-dom': 'survey-js-ui',
+        'survey-react-ui': 'survey-js-ui',
+    },
 }).then(() => {
     console.log(`Build completed for survey-js-creator.js`)
 })

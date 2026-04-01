@@ -5,6 +5,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | License Key
+    |--------------------------------------------------------------------------
+    |
+    | Cle de licence SurveyJS. Requise pour le Creator et pour supprimer
+    | le watermark en production. Definir via SURVEYJS_LICENSE_KEY dans .env
+    |
+    */
+    'license_key' => env('SURVEYJS_LICENSE_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Locale
     |--------------------------------------------------------------------------
     |
