@@ -55,6 +55,10 @@ export default function surveyjsForm({
     progressBarPercent,
     contained,
     containedWithTitle,
+    fileUploadUrl,
+    fileDownloadUrl,
+    fileDeleteUrl,
+    fileErrors,
 }) {
     let survey = null
     const UI_KEY = `surveyjs_ui_${statePath}`
@@ -100,6 +104,133 @@ export default function surveyjsForm({
                     component: 'sv-progressbar-percentage',
                     container: 'contentTop',
                     data: survey,
+                })
+            }
+
+            // Handlers d'upload / download / suppression de fichiers
+            if (fileUploadUrl) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+
+                survey.onUploadFiles.add((sender, options) => {
+                    const formData = new FormData()
+                    options.files.forEach((file) =>
+                        formData.append('files[]', file),
+                    )
+
+                    fetch(fileUploadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            Accept: 'application/json',
+                        },
+                        body: formData,
+                    })
+                        .then(async (r) => {
+                            if (r.ok) return r.json()
+                            if (r.status === 413)
+                                throw new Error(
+                                    fileErrors?.tooLarge || 'File too large',
+                                )
+                            if (r.status === 422) {
+                                const data = await r.json().catch(() => null)
+                                const messages = data?.errors
+                                    ? Object.values(data.errors).flat()
+                                    : []
+                                throw new Error(
+                                    messages.join(', ') ||
+                                        fileErrors?.failed ||
+                                        'Upload failed',
+                                )
+                            }
+                            throw new Error(
+                                fileErrors?.failed || 'Upload failed',
+                            )
+                        })
+                        .then((data) => options.callback(data.files))
+                        .catch((err) => options.callback([], [err.message]))
+                })
+
+                survey.onDownloadFile.add((sender, options) => {
+                    // Les données base64 ou data: URLs sont déjà utilisables
+                    if (
+                        !options.content ||
+                        options.content.startsWith('data:')
+                    ) {
+                        options.callback('success', options.content)
+                        return
+                    }
+
+                    const url =
+                        fileDownloadUrl +
+                        (fileDownloadUrl.includes('?') ? '&' : '?') +
+                        'path=' +
+                        encodeURIComponent(options.content)
+
+                    fetch(url)
+                        .then((r) => {
+                            if (!r.ok)
+                                throw new Error(
+                                    `Download failed: ${r.status}`,
+                                )
+                            return r.blob()
+                        })
+                        .then(
+                            (blob) =>
+                                new Promise((resolve) => {
+                                    const reader = new FileReader()
+                                    reader.onload = () =>
+                                        resolve(reader.result)
+                                    reader.readAsDataURL(blob)
+                                }),
+                        )
+                        .then((base64) =>
+                            options.callback('success', base64),
+                        )
+                        .catch(() => options.callback('error'))
+                })
+
+                survey.onClearFiles.add((sender, options) => {
+                    // Déterminer les chemins à supprimer
+                    const paths = []
+                    if (options.fileName) {
+                        // Suppression d'un fichier spécifique
+                        const files = Array.isArray(options.value)
+                            ? options.value
+                            : [options.value]
+                        const file = files.find(
+                            (f) => f?.name === options.fileName,
+                        )
+                        if (file?.content) paths.push(file.content)
+                    } else if (options.value) {
+                        // Suppression de tous les fichiers
+                        const files = Array.isArray(options.value)
+                            ? options.value
+                            : [options.value]
+                        files.forEach((f) => {
+                            if (f?.content) paths.push(f.content)
+                        })
+                    }
+
+                    if (paths.length === 0 || !fileDeleteUrl) {
+                        options.callback('success')
+                        return
+                    }
+
+                    Promise.all(
+                        paths.map((path) =>
+                            fetch(fileDeleteUrl, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Content-Type': 'application/json',
+                                    Accept: 'application/json',
+                                },
+                                body: JSON.stringify({ path }),
+                            }),
+                        ),
+                    )
+                        .then(() => options.callback('success'))
+                        .catch(() => options.callback('error'))
                 })
             }
 

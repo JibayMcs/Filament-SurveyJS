@@ -42,4 +42,21 @@ return [
     'auto_save' => false,
     'auto_save_debounce' => 500,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Upload de fichiers
+    |--------------------------------------------------------------------------
+    |
+    | Configuration pour les questions SurveyJS de type 'file' et 'signaturepad'.
+    | Activez fileUpload() sur le champ pour utiliser ces parametres.
+    |
+    */
+    'file_upload' => [
+        'disk' => null, // null = filesystems.default
+        'directory' => 'survey-uploads',
+        'visibility' => 'private', // 'public' ou 'private'
+        'max_size' => null, // En octets. null = pas de limite
+        'accepted_types' => null, // Ex: ['.pdf', '.docx', 'image/*']
+    ],
+
 ];

@@ -5,6 +5,7 @@ namespace JibayMcs\SurveyJs\Forms;
 use Filament\Forms\Components\Field;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyCompletion;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyDisplay;
+use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyFileUpload;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyJson;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyNavigation;
 use JibayMcs\SurveyJs\Forms\Concerns\HasSurveyPersistence;
@@ -15,6 +16,7 @@ class SurveyJSFormField extends Field
 {
     use HasSurveyCompletion;
     use HasSurveyDisplay;
+    use HasSurveyFileUpload;
     use HasSurveyJson;
     use HasSurveyNavigation;
     use HasSurveyPersistence;

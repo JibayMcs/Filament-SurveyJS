@@ -55,6 +55,19 @@ trait HasSurveyJson
         }
     }
 
+    protected function applyStoreDataAsText(array &$elements): void
+    {
+        foreach ($elements as &$element) {
+            if (isset($element['type']) && in_array($element['type'], ['file', 'signaturepad'])) {
+                $element['storeDataAsText'] = false;
+            }
+
+            if (isset($element['elements'])) {
+                $this->applyStoreDataAsText($element['elements']);
+            }
+        }
+    }
+
     public function getSurveyTitle(): ?string
     {
         $title = ($this->surveyJson ?? [])['title'] ?? null;
@@ -104,6 +117,15 @@ trait HasSurveyJson
 
         if (method_exists($this, 'applySignaturePenColor')) {
             $json = $this->applySignaturePenColor($json);
+        }
+
+        if (property_exists($this, 'fileUploadEnabled') && $this->fileUploadEnabled && isset($json['pages'])) {
+            foreach ($json['pages'] as &$page) {
+                if (isset($page['elements'])) {
+                    $this->applyStoreDataAsText($page['elements']);
+                }
+            }
+            unset($page);
         }
 
         return $json;

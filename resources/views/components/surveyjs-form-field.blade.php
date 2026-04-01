@@ -17,6 +17,14 @@
             progressBarPercent: @js($field->progressBarPercent ?? false),
             contained: @js($field->contained ?? false),
             containedWithTitle: @js($field->containedWithTitle ?? true),
+            fileUploadUrl: @js($field->getFileUploadUrl()),
+            fileDownloadUrl: @js($field->getFileDownloadUrl()),
+            fileDeleteUrl: @js($field->getFileDeleteUrl()),
+            fileErrors: @js([
+                'tooLarge' => __('survey-js::survey-js.upload.file_too_large'),
+                'invalidType' => __('survey-js::survey-js.upload.invalid_type'),
+                'failed' => __('survey-js::survey-js.upload.failed'),
+            ]),
         })"
         wire:ignore
     >
