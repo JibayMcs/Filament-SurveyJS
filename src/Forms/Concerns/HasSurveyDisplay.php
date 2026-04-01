@@ -27,6 +27,8 @@ trait HasSurveyDisplay
 
     public ?bool $contained = true;
 
+    public ?bool $containedWithTitle = true;
+
     public function panelless(?bool $condition = true): static
     {
         $this->panelless = $condition;
@@ -78,9 +80,15 @@ trait HasSurveyDisplay
         return $this;
     }
 
-    public function contained(?bool $condition = true): static
+    public function isReadOnly(): bool
+    {
+        return $this->readOnly || $this->isDisabled();
+    }
+
+    public function contained(?bool $condition = true, bool $withTitle = true): static
     {
         $this->contained = $condition;
+        $this->containedWithTitle = $condition ? $withTitle : false;
 
         return $this;
     }

@@ -1,5 +1,8 @@
+@import "tailwindcss/theme" layer(theme);
 @import 'survey-core/survey-core.fontless.css';
 @import 'survey-creator-core/survey-creator-core.fontless.css';
+
+@custom-variant dark (&:is(.dark *));
 
 /* Masque les éléments Alpine avant initialisation — évite tout flash de contenu */
 [x-cloak] { display: none !important; }
@@ -58,12 +61,8 @@
     width: 100%;
     max-width: 50%;
     border-radius: 9999px;
-    background: var(--gray-200);
+    @apply bg-gray-200 dark:bg-gray-700;
     height: 8px;
-}
-
-.dark .sv-progressbar-percentage__indicator {
-    background: var(--gray-700);
 }
 
 .sv-progressbar-percentage__value-bar {
@@ -78,10 +77,7 @@
 }
 
 .sv-progressbar-percentage__value {
-    font-size: var(--text-sm);
-    line-height: var(--tw-leading,var(--text-sm--line-height));
-    font-weight: var(--font-weight-medium);
-    color: var(--gray-500);
+    @apply text-sm font-medium text-gray-500;
 }
 
 /* Navigation buttons */

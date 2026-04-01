@@ -10,6 +10,8 @@ trait HasSurveyJson
 
     protected ?bool $allFieldsRequired = null;
 
+    protected ?string $locale = null;
+
     public function survey(Closure|string|array|null $json): static
     {
         if (is_callable($json)) {
@@ -21,6 +23,18 @@ trait HasSurveyJson
         }
 
         return $this;
+    }
+
+    public function locale(?string $locale): static
+    {
+        $this->locale = $locale;
+
+        return $this;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale ?? config('survey-js.locale') ?? app()->getLocale();
     }
 
     public function allFieldsRequired(?bool $condition = true): static
@@ -39,6 +53,17 @@ trait HasSurveyJson
                 $this->applyRequiredToElements($element['elements']);
             }
         }
+    }
+
+    public function getSurveyTitle(): ?string
+    {
+        $title = ($this->surveyJson ?? [])['title'] ?? null;
+
+        if (is_array($title)) {
+            return $title['default'] ?? reset($title) ?: null;
+        }
+
+        return $title;
     }
 
     public function getSurveyJson(): array
@@ -63,10 +88,19 @@ trait HasSurveyJson
             'autoAdvanceEnabled'    => $this->autoAdvanceEnabled ?? null,
             'autoAdvanceAllowComplete' => $this->autoAdvanceAllowComplete ?? null,
             'checkErrorsMode'       => $this->checkErrorsMode?->value ?? null,
-            'readOnly'              => $this->readOnly ?? null,
+            'readOnly'              => $this->isReadOnly() ?: null,
         ], fn ($value) => $value !== null);
 
         $json = array_merge($json, $options);
+
+        // Masquer les titres natifs SurveyJS quand contained avec titre (affiché en legend du fieldset)
+        if ($this->contained && $this->containedWithTitle) {
+            if (! empty($json['title'])) {
+                $json['showTitle'] = false;
+            } else {
+                $json['showPageTitles'] = false;
+            }
+        }
 
         if (method_exists($this, 'applySignaturePenColor')) {
             $json = $this->applySignaturePenColor($json);

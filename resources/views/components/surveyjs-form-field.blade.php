@@ -12,8 +12,11 @@
             panelless: @js($field->panelless),
             transparent: @js($field->transparent),
             statePath: @js($getStatePath()),
-            readOnly: @js($field->readOnly ?? false),
+            readOnly: @js($field->isReadOnly()),
+            locale: @js($field->getLocale()),
             progressBarPercent: @js($field->progressBarPercent ?? false),
+            contained: @js($field->contained ?? false),
+            containedWithTitle: @js($field->containedWithTitle ?? true),
         })"
         wire:ignore
     >
@@ -23,14 +26,20 @@
             </div>
         </template>
 
-        <div
-            x-ref="surveyContainer"
-            x-show="!loading"
-            x-cloak
-            @class([
-                $field->contained ? 'fi-sc-fieldset' : '',
-            ])
-        ></div>
+        @if($field->contained)
+            <fieldset class="fi-fieldset" x-show="!loading" x-cloak>
+                @if($field->containedWithTitle)
+                    <legend x-show="surveyTitle" x-text="surveyTitle"></legend>
+                @endif
+                <div x-ref="surveyContainer"></div>
+            </fieldset>
+        @else
+            <div
+                x-ref="surveyContainer"
+                x-show="!loading"
+                x-cloak
+            ></div>
+        @endif
 
         <template x-if="!loading">
             <div class="sjs-navigation">

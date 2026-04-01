@@ -1,4 +1,7 @@
 import esbuild from 'esbuild'
+import postcss from 'postcss'
+import tailwindcss from '@tailwindcss/postcss'
+import fs from 'fs/promises'
 
 const isDev = process.argv.includes('--dev')
 
@@ -43,6 +46,7 @@ const defaultOptions = {
     }],
 }
 
+// JS builds via esbuild
 compile({
     ...defaultOptions,
     entryPoints: ['./resources/js/index-form.js'],
@@ -59,10 +63,26 @@ compile({
     console.log(`Build completed for survey-js-creator.js`)
 })
 
-compile({
-    ...defaultOptions,
-    entryPoints: ['./resources/css/index.css'],
-    outfile: './resources/dist/survey.css',
-}).then(() => {
+// CSS build via PostCSS + Tailwind (pour supporter @apply comme Filament)
+async function compileCss(inputFile, outputFile) {
+    console.log(`Build started at ${new Date(Date.now()).toLocaleTimeString()}: ${outputFile}`)
+
+    const css = await fs.readFile(inputFile, 'utf8')
+    const result = await postcss([tailwindcss()]).process(css, {
+        from: inputFile,
+        to: outputFile,
+    })
+
+    let output = result.css
+
+    if (!isDev) {
+        const minified = await esbuild.transform(output, { loader: 'css', minify: true })
+        output = minified.code
+    }
+
+    await fs.writeFile(outputFile, output)
+    console.log(`Build finished at ${new Date(Date.now()).toLocaleTimeString()}: ${outputFile}`)
     console.log(`Build completed for survey.css`)
-})
+}
+
+compileCss('./resources/css/index.css', './resources/dist/survey.css')

@@ -1,6 +1,7 @@
 import * as Survey from 'survey-core'
+import 'survey-core/survey.i18n'
 import * as SurveyUI from 'survey-js-ui'
-import { light, dark } from './filament-theme'
+import { dark, light } from './filament-theme'
 
 // Enregistrement du composant "barre de progression en pourcentage"
 // Compatible survey-js-ui (VanillaJS) via l'API ReactElementFactory
@@ -11,17 +12,27 @@ window.React = window.React || { createElement: h }
 class PercentageProgressBar extends SurveyUI.ReactSurveyElement {
     render() {
         const model = this.props.model
-        return h('div', { className: 'sv-progressbar-percentage' },
-            model.progressTitle && h('div', { className: 'sv-progressbar-percentage__title' },
-                h('span', null, model.progressTitle),
+        return h(
+            'div',
+            { className: 'sv-progressbar-percentage' },
+            model.progressTitle &&
+                h(
+                    'div',
+                    { className: 'sv-progressbar-percentage__title' },
+                    h('span', null, model.progressTitle),
+                ),
+            h(
+                'div',
+                { className: 'sv-progressbar-percentage__indicator' },
+                model.progressValue > 0 &&
+                    h('div', {
+                        className: 'sv-progressbar-percentage__value-bar',
+                        style: { width: model.progressValue + '%' },
+                    }),
             ),
-            h('div', { className: 'sv-progressbar-percentage__indicator' },
-                model.progressValue > 0 && h('div', {
-                    className: 'sv-progressbar-percentage__value-bar',
-                    style: { width: model.progressValue + '%' },
-                }),
-            ),
-            h('div', { className: 'sv-progressbar-percentage__value' },
+            h(
+                'div',
+                { className: 'sv-progressbar-percentage__value' },
                 h('span', null, model.progressValue + '%'),
             ),
         )
@@ -33,7 +44,18 @@ SurveyUI.ReactElementFactory.Instance.registerElement(
     (props) => h(PercentageProgressBar, props),
 )
 
-export default function surveyjsForm({ state: initialState, surveyJson, panelless, transparent, statePath, readOnly, progressBarPercent }) {
+export default function surveyjsForm({
+    state: initialState,
+    surveyJson,
+    panelless,
+    transparent,
+    statePath,
+    readOnly,
+    locale,
+    progressBarPercent,
+    contained,
+    containedWithTitle,
+}) {
     let survey = null
     const UI_KEY = `surveyjs_ui_${statePath}`
 
@@ -41,24 +63,32 @@ export default function surveyjsForm({ state: initialState, surveyJson, panelles
         const base = mode === 'dark' ? dark : light
         const theme = { ...base, cssVariables: { ...base.cssVariables } }
         if (panelless) theme.isPanelless = true
-        if (transparent) theme.cssVariables['--sjs-general-backcolor-dim'] = 'transparent'
+        if (transparent)
+            theme.cssVariables['--sjs-general-backcolor-dim'] = 'transparent'
         survey.applyTheme(theme)
     }
 
     function updatePageState(component) {
         component.isFirstPage = survey.isFirstPage
         component.isLastPage = survey.isLastPage
+        if (containedWithTitle && !survey.title) {
+            component.surveyTitle = survey.currentPage?.title || ''
+        }
     }
 
-return {
+    return {
         state: initialState,
         loading: true,
         isFirstPage: true,
         isLastPage: false,
         readOnly: readOnly ?? false,
+        surveyTitle: '',
 
         init() {
             survey = new Survey.Model(surveyJson)
+
+            // Appliquer la locale pour les textes d'interface SurveyJS
+            if (locale) survey.locale = locale
 
             // Masquer la navigation native SurveyJS (remplacée par les boutons Filament)
             survey.showNavigationButtons = false
@@ -74,14 +104,25 @@ return {
             }
 
             // Pré-remplir le survey avec les données existantes depuis le state Filament
-            if (this.state && typeof this.state === 'object' && Object.keys(this.state).length > 0) {
+            if (
+                this.state &&
+                typeof this.state === 'object' &&
+                Object.keys(this.state).length > 0
+            ) {
                 survey.data = this.state
             }
 
             // Restaurer la position de page depuis le localStorage
             const savedUiState = localStorage.getItem(UI_KEY)
             if (savedUiState) {
-                try { survey.uiState = JSON.parse(savedUiState) } catch (_) {}
+                try {
+                    survey.uiState = JSON.parse(savedUiState)
+                } catch (_) {}
+            }
+
+            if (containedWithTitle) {
+                this.surveyTitle =
+                    survey.title || survey.currentPage?.title || ''
             }
 
             applyTheme(Alpine.store('theme'))

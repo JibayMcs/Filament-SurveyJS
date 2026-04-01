@@ -26,6 +26,27 @@ class SurveyJSFormField extends Field
     {
         parent::setUp();
 
+        $this->panelless = config('survey-js.panelless', false);
+        $this->transparent = config('survey-js.transparent', false);
+        $this->contained = config('survey-js.contained', true);
+        $this->containedWithTitle = config('survey-js.contained_with_title', true);
+        $this->readOnly = config('survey-js.read_only', false);
+        $this->locale = config('survey-js.locale');
+
+        $this->afterStateHydrated(function (SurveyJSFormField $component, $state): void {
+            if ($state === null) {
+                $component->state([]);
+            }
+        });
+
+        $this->dehydrateStateUsing(function ($state) {
+            if (is_array($state)) {
+                return collect($state)->except('__surveyCompleted')->all();
+            }
+
+            return $state ?? [];
+        });
+
         $this->afterStateUpdated(function (?array $state, SurveyJSFormField $component): void {
             $isComplete = !empty($state['__surveyCompleted']);
             $cleanData = collect($state ?? [])->except('__surveyCompleted')->all();
