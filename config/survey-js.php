@@ -57,6 +57,7 @@ return [
         'visibility' => 'private', // 'public' ou 'private'
         'max_size' => null, // En octets. null = pas de limite
         'accepted_types' => null, // Ex: ['.pdf', '.docx', 'image/*']
+        'auth_guard' => null, // null = guard par defaut. Ex: 'web', 'filament'
     ],
 
 ];
