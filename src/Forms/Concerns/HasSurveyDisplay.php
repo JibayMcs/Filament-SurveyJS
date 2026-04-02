@@ -2,6 +2,7 @@
 
 namespace JibayMcs\SurveyJs\Forms\Concerns;
 
+use Closure;
 use JibayMcs\SurveyJs\Enums\CheckErrorsMode;
 use JibayMcs\SurveyJs\Enums\ProgressBarLocation;
 
@@ -10,6 +11,8 @@ trait HasSurveyDisplay
     public ?bool $panelless = false;
 
     public ?bool $transparent = false;
+
+    public ?array $themeJson = null;
 
     protected ?bool $showProgressBar = false;
 
@@ -99,5 +102,23 @@ trait HasSurveyDisplay
         $this->containedWithTitle = $condition ? $withTitle : false;
 
         return $this;
+    }
+
+    public function theme(Closure|string|array|null $theme): static
+    {
+        if (is_callable($theme)) {
+            $this->themeJson = $this->evaluate($theme);
+        } elseif (is_string($theme)) {
+            $this->themeJson = json_decode($theme, true);
+        } else {
+            $this->themeJson = $theme;
+        }
+
+        return $this;
+    }
+
+    public function getThemeJson(): ?array
+    {
+        return $this->themeJson;
     }
 }

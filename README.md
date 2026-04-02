@@ -5,10 +5,11 @@
 
 A [SurveyJS](https://surveyjs.io) integration for [FilamentPHP v5](https://filamentphp.com). Render and build dynamic surveys directly in your Filament panels with full theme integration, auto-save, versioning, file uploads, and more.
 
-**Two field components included:**
+**Three components included:**
 
 - **`SurveyJSFormField`** — Render a survey in a Filament form (respondent view)
 - **`SurveyJSCreatorField`** — Embed the SurveyJS Creator editor (builder view)
+- **`SurveyRenderer`** — Generate standalone, print-friendly HTML from survey responses (no JS required)
 
 ---
 
@@ -105,6 +106,25 @@ SurveyJSFormField::make('survey_data')
     ->contained(false)       // No fieldset wrapper
 ```
 
+### Custom Theme
+
+Apply a custom SurveyJS theme JSON to override the default Filament-matching theme:
+
+```php
+SurveyJSFormField::make('survey_data')
+    ->survey($json)
+    // From an array
+    ->theme($themeArray)
+    // From a JSON string
+    ->theme('{"cssVariables": {"--sjs-general-backcolor": "#ffffff"}, ...}')
+    // From a Closure
+    ->theme(fn () => json_decode(file_get_contents(storage_path('surveys/my-theme.json')), true))
+```
+
+> **Tip:** You can build custom themes using the [SurveyJS Theme Editor](https://surveyjs.io/form-library/documentation/manage-default-themes-and-styles) and export the JSON.
+
+When a custom theme is set, the automatic Filament light/dark theme switching is bypassed — your theme is applied as-is.
+
 ### Navigation Buttons
 
 Navigation uses Filament's `<x-filament::button>` with full color customization:
@@ -115,6 +135,7 @@ SurveyJSFormField::make('survey_data')
     ->showNavigationButtons()     // Show prev/next/complete buttons (default: true)
     ->showNavigationButtons(false, autoAdvance: true) // Hide buttons, auto-advance when page is complete
     ->showPrevButton(false)       // Hide the "Previous" button
+    ->nativeNavigation()          // Use SurveyJS built-in navigation instead of Filament buttons
     ->pageNextText('Next step')   // Custom button text
     ->pagePrevText('Go back')
     ->completeText('Submit')
@@ -178,12 +199,13 @@ Enable server-side file storage for `file` and `signaturepad` question types:
 ```php
 SurveyJSFormField::make('survey_data')
     ->survey($json)
-    ->fileUpload()                           // Enable file uploads
-    ->fileUploadDisk('s3')                   // Storage disk (default: filesystems.default)
-    ->fileUploadDirectory('survey-files')    // Upload directory (default: 'survey-uploads')
-    ->fileUploadVisibility('private')        // 'public' or 'private' (default: 'private')
-    ->fileUploadMaxSize(5 * 1024 * 1024)    // Max size in bytes (5MB)
-    ->fileUploadAcceptedTypes(['.pdf', '.docx', 'image/*'])  // Accepted MIME types
+    ->fileUpload(
+        disk: 's3',                                    // Storage disk (default: filesystems.default)
+        directory: 'survey-files',                     // Upload directory (default: 'survey-uploads')
+        visibility: 'private',                         // 'public' or 'private' (default: 'private')
+        maxSize: 5 * 1024 * 1024,                      // Max size in bytes (5MB)
+        acceptedTypes: ['.pdf', '.docx', 'image/*'],   // Accepted MIME types
+    )
 ```
 
 Upload routes are protected by the `web` middleware and a configurable auth guard (see [Configuration](#configuration)).
@@ -205,6 +227,42 @@ SurveyJSFormField::make('survey_data')
             ->title('Survey completed!')
             ->success()
     )
+```
+
+### Survey JSON Options
+
+Inject any root-level [SurveyJS property](https://surveyjs.io/form-library/documentation/api-reference/survey-data-model) programmatically:
+
+```php
+SurveyJSFormField::make('survey_data')
+    ->survey($json)
+    // Single option
+    ->option('logo', 'https://example.com/logo.png')
+    ->option('logoHeight', '64')
+    ->option('questionDescriptionLocation', 'underInput')
+    ->option('showQuestionNumbers', 'off')
+    // Batch options
+    ->options([
+        'logo' => 'https://example.com/logo.png',
+        'logoHeight' => '64',
+        'logoFit' => 'contain',
+        'completedBeforeHtml' => '<h3>You already completed this survey.</h3>',
+    ])
+```
+
+#### Completed HTML
+
+A dedicated method for the `completedHtml` property with Blade view support:
+
+```php
+SurveyJSFormField::make('survey_data')
+    ->survey($json)
+    // From a Blade view
+    ->completedHtml(view('surveys.completed', ['name' => $user->name]))
+    // From a raw HTML string
+    ->completedHtml('<h3>Thank you for your participation!</h3>')
+    // From a Closure (has access to Filament's $record, $state, etc.)
+    ->completedHtml(fn ($record) => view('surveys.completed', ['employee' => $record]))
 ```
 
 ### Auto-Save
@@ -265,15 +323,16 @@ SurveyJSFormField::make('survey_data')
     ->locale('fr')
     ->contained()
     ->panelless()
+    ->theme(fn () => json_decode(file_get_contents(storage_path('surveys/custom-theme.json')), true))
+    ->option('logo', 'https://example.com/logo.png')
+    ->option('questionDescriptionLocation', 'underInput')
+    ->completedHtml(view('surveys.completed'))
     ->showProgressBar(hasPercent: true, color: 'primary')
     ->progressBarLocation(ProgressBarLocation::Top)
     ->checkErrorsMode(CheckErrorsMode::OnNextPage)
     ->allFieldsRequired()
     ->signaturePenColor(Color::Blue)
-    ->fileUpload()
-    ->fileUploadDisk('local')
-    ->fileUploadDirectory('surveys/files')
-    ->fileUploadMaxSize(10 * 1024 * 1024)
+    ->fileUpload(disk: 'local', directory: 'surveys/files', maxSize: 10 * 1024 * 1024)
     ->autoSave(debounce: 1000)
     ->versioning(onEveryChange: true)
     ->nextButtonColor('primary')
@@ -406,6 +465,223 @@ SurveyJSCreatorField::make('survey_json')
 
 ---
 
+## Survey Renderer — `SurveyRenderer`
+
+Generate standalone, print-friendly HTML from a SurveyJS JSON schema and response data. The output is a self-contained HTML document with inline CSS — no JavaScript required. Ideal for PDF generation, printing, archiving, or displaying read-only results.
+
+### Basic Usage
+
+```php
+use JibayMcs\SurveyJs\Rendering\SurveyRenderer;
+
+// Get the rendered HTML string
+$html = SurveyRenderer::make($surveyJson, $responseData)->render();
+
+// Return as an HTTP response
+return SurveyRenderer::make($surveyJson, $responseData)->toResponse();
+
+// Get a Blade View instance
+$view = SurveyRenderer::make($surveyJson, $responseData)->toView();
+```
+
+### Display Options
+
+```php
+SurveyRenderer::make($surveyJson, $responseData)
+    ->locale('fr')                    // Locale for titles, dates, etc. (default: app locale)
+    ->theme('filament')               // 'filament', 'minimal', or 'print'
+    ->showUnanswered(false)           // Hide unanswered questions (default: true)
+    ->unansweredText('N/A')           // Text for unanswered questions (default: '—')
+    ->showPageTitles(false)           // Hide page titles
+    ->showQuestionNumbers(false)      // Hide question numbers
+    ->showPageBreaks(false)           // Disable page breaks between pages
+    ->render();
+```
+
+### Themes
+
+Three built-in themes are available:
+
+- **`filament`** — Matches Filament's design system (indigo primary, gray accents)
+- **`minimal`** — Black & white with minimal styling
+- **`print`** — Optimized for printing (smaller font, no backgrounds, high-contrast borders)
+
+### Date & Time Formatting
+
+Format date, datetime, and time values using [Carbon's `isoFormat()`](https://carbon.nesbot.com/docs/#api-localization) (CLDR patterns):
+
+```php
+SurveyRenderer::make($surveyJson, $responseData)
+    ->locale('fr')
+    ->dateFormat('L')           // Default: 'L' (e.g. 02/04/2026)
+    ->datetimeFormat('L LT')    // Default: 'L LT' (e.g. 02/04/2026 14:30)
+    ->timeFormat('LT')          // Default: 'LT' (e.g. 14:30)
+    ->render();
+```
+
+### File & Signature Rendering
+
+Files and signatures stored on a private disk are automatically resolved to inline base64 data URIs, making the HTML fully self-contained:
+
+```php
+SurveyRenderer::make($surveyJson, $responseData)
+    ->disk('local')    // Storage disk for resolving file paths (default: config value)
+    ->render();
+```
+
+### Header & Footer
+
+```php
+SurveyRenderer::make($surveyJson, $responseData)
+    ->showHeader()                         // Show survey title header (default: true)
+    ->showFooter()                         // Show footer (default: false)
+    ->headerView('my-package::header')     // Custom Blade view for the header
+    ->footerView('my-package::footer')     // Custom Blade view for the footer
+    ->render();
+```
+
+### Custom Renderers
+
+Register custom renderers for specific question types:
+
+```php
+use JibayMcs\SurveyJs\Rendering\SurveyRenderer;
+use JibayMcs\SurveyJs\Rendering\QuestionRenderer;
+
+class MyCustomRenderer extends QuestionRenderer
+{
+    public function getDisplayValue(): mixed
+    {
+        return $this->value;
+    }
+
+    protected function getViewType(): string
+    {
+        return 'my-custom-type'; // maps to survey-js::rendering.types.my-custom-type
+    }
+}
+
+// In a service provider
+SurveyRenderer::registerRenderer('mycustomtype', MyCustomRenderer::class);
+```
+
+### Supported Question Types
+
+| Category | Types |
+|---|---|
+| **Text** | `text`, `comment`, `multipletext` |
+| **Choice** | `checkbox`, `radiogroup`, `dropdown`, `tagbox`, `ranking`, `buttongroup` |
+| **Rating** | `rating` |
+| **Boolean** | `boolean` |
+| **Matrix** | `matrix`, `matrixdropdown`, `matrixdynamic` |
+| **File** | `file`, `signaturepad` |
+| **Media** | `image`, `imagepicker` |
+| **Layout** | `panel`, `paneldynamic`, `html`, `expression` |
+| **Slider** | `slider` |
+
+### Layout Support
+
+The renderer respects SurveyJS layout properties:
+
+- **`startWithNewLine: false`** — Questions are rendered side-by-side using flexbox
+- **`titleLocation: "hidden"`** — Question title is hidden
+- **`showNumber: false`** — Question number is hidden
+- **`visible: false`** on matrix columns — Column is excluded from rendering
+
+### Structured Data Export
+
+SurveyJS stores response data as a flat key-value object (`{ "question1": "value", ... }`). The `toExportData()` method restructures it into a clean, page-ordered format that mirrors the survey JSON definition — ideal for APIs, archiving, or storing a readable version alongside the raw data.
+
+```php
+use JibayMcs\SurveyJs\Rendering\SurveyRenderer;
+
+// Get structured array
+$structured = SurveyRenderer::make($surveyJson, $responseData)
+    ->locale('fr')
+    ->toExportData();
+
+// Get structured JSON string
+$json = SurveyRenderer::make($surveyJson, $responseData)
+    ->locale('fr')
+    ->toExportJson();
+
+// Quick static helper (no fluent config needed)
+$structured = SurveyRenderer::structureData($surveyJson, $responseData, 'fr');
+```
+
+Output format:
+
+```json
+{
+  "title": "Annual Review",
+  "pages": [
+    {
+      "name": "page1",
+      "title": "General Information",
+      "questions": [
+        { "name": "question1", "type": "text", "title": "Date", "value": "2026-03-04", "displayValue": "4 mars 2026" },
+        {
+          "name": "question2", "type": "panel", "title": "Employee",
+          "questions": [
+            { "name": "q3", "type": "text", "title": "Last name", "value": "Doe" }
+          ]
+        },
+        {
+          "name": "question4", "type": "matrixdynamic", "title": "Objectives",
+          "entries": [
+            {
+              "index": 0,
+              "questions": [
+                { "name": "col1", "type": "comment", "title": "Objective", "value": "..." }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Use it in an `onComplete` callback to save structured results:
+
+```php
+SurveyJSFormField::make('survey_data')
+    ->survey($surveyJson)
+    ->onComplete(function (array $data, $record) use ($surveyJson) {
+        $record->update([
+            'structured_results' => SurveyRenderer::structureData($surveyJson, $data, 'fr'),
+        ]);
+    })
+```
+
+### Full Example
+
+```php
+use JibayMcs\SurveyJs\Rendering\SurveyRenderer;
+
+$html = SurveyRenderer::make($surveyJson, $responseData)
+    ->locale('fr')
+    ->theme('filament')
+    ->disk('local')
+    ->dateFormat('LL')
+    ->datetimeFormat('LLL')
+    ->showQuestionNumbers()
+    ->showUnanswered()
+    ->unansweredText('Non renseigne')
+    ->showHeader()
+    ->showFooter()
+    ->render();
+
+// Use in a controller
+return response($html);
+
+// Or generate a PDF with a library like Browsershot
+Browsershot::html($html)->save('survey-result.pdf');
+```
+
+---
+
 ## Configuration
 
 Published config file (`config/survey-js.php`):
@@ -454,6 +730,8 @@ All config values serve as defaults. Explicit method calls on the field always t
 The plugin automatically applies a Filament-matching theme to SurveyJS. Dark mode is fully supported and switches automatically with Filament's theme toggle.
 
 The theme uses CSS variables from Filament's design system, so colors stay consistent with your panel's custom theme.
+
+To use a fully custom SurveyJS theme instead, use the [`theme()`](#custom-theme) method — this bypasses the automatic Filament theme entirely.
 
 ---
 

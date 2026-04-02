@@ -4,6 +4,22 @@ All notable changes to `filament-surveyjs` will be documented in this file.
 
 ## 1.0.0 - 2026-04-02
 
+### Survey Renderer (`SurveyRenderer`)
+
+- **Standalone HTML rendering** — `SurveyRenderer::make($json, $data)->render()` produces self-contained HTML with inline CSS
+- **26 question types** — text, comment, multipletext, checkbox, radiogroup, dropdown, tagbox, ranking, buttongroup, rating, boolean, matrix, matrixdropdown, matrixdynamic, file, signaturepad, image, imagepicker, html, expression, panel, paneldynamic, slider
+- **3 themes** — `filament` (default), `minimal`, `print`
+- **Locale-aware date formatting** — `dateFormat()`, `datetimeFormat()`, `timeFormat()` using Carbon `isoFormat()` (CLDR patterns)
+- **Private file support** — Files and signatures resolved to inline base64 data URIs via `disk()`
+- **Layout support** — `startWithNewLine: false` renders questions side-by-side, `titleLocation: "hidden"`, `showNumber: false`
+- **Matrix rendering** — Full support for `matrix`, `matrixdropdown`, `matrixdynamic` with column `name`/`title` resolution and `visible: false` filtering
+- **Print-friendly CSS** — `@media print` rules with cross-browser border rendering (Chrome, Firefox, Safari)
+- **Custom renderers** — `SurveyRenderer::registerRenderer()` for extending with custom question types
+- **Header/footer** — Customizable via `headerView()` / `footerView()` with custom Blade templates
+- **Display options** — `showUnanswered()`, `showPageTitles()`, `showQuestionNumbers()`, `showPageBreaks()`, `unansweredText()`
+- **Output formats** — `render()` (HTML string), `toView()` (Blade View), `toResponse()` (HTTP Response)
+- **Structured data export** — `toExportData()` / `toExportJson()` / `structureData()` restructures flat SurveyJS responses into page-ordered format mirroring the survey definition
+
 ### Form Field (`SurveyJSFormField`)
 
 - **Survey rendering** — Render SurveyJS surveys in Filament forms with full `$entangle` state sync

@@ -18,51 +18,42 @@ trait HasSurveyFileUpload
 
     protected ?array $fileUploadAcceptedTypes = null;
 
-    public function fileUpload(bool $condition = true): static
-    {
+    public function fileUpload(
+        bool $condition = true,
+        ?string $disk = null,
+        ?string $directory = null,
+        ?string $visibility = null,
+        ?int $maxSize = null,
+        ?array $acceptedTypes = null,
+    ): static {
         $this->fileUploadEnabled = $condition;
 
-        return $this;
-    }
+        if ($disk !== null) {
+            $this->fileUploadDisk = $disk;
+        }
 
-    public function fileUploadDisk(?string $disk): static
-    {
-        $this->fileUploadDisk = $disk;
+        if ($directory !== null) {
+            $this->fileUploadDirectory = $directory;
+        }
 
-        return $this;
-    }
+        if ($visibility !== null) {
+            $this->fileUploadVisibility = $visibility;
+        }
 
-    public function fileUploadDirectory(?string $directory): static
-    {
-        $this->fileUploadDirectory = $directory;
+        if ($maxSize !== null) {
+            $this->fileUploadMaxSize = $maxSize;
+        }
 
-        return $this;
-    }
-
-    public function fileUploadVisibility(?string $visibility): static
-    {
-        $this->fileUploadVisibility = $visibility;
-
-        return $this;
-    }
-
-    public function fileUploadMaxSize(?int $bytes): static
-    {
-        $this->fileUploadMaxSize = $bytes;
-
-        return $this;
-    }
-
-    public function fileUploadAcceptedTypes(?array $types): static
-    {
-        $this->fileUploadAcceptedTypes = $types;
+        if ($acceptedTypes !== null) {
+            $this->fileUploadAcceptedTypes = $acceptedTypes;
+        }
 
         return $this;
     }
 
     public function getFileUploadDisk(): string
     {
-        return $this->fileUploadDisk ?? config('survey-js.file_upload.disk', config('filesystems.default'));
+        return $this->fileUploadDisk ?? config('survey-js.file_upload.disk') ?? config('filesystems.default');
     }
 
     public function getFileUploadDirectory(): string

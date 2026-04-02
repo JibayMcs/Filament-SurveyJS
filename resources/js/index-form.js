@@ -62,11 +62,17 @@ export default function surveyjsForm({
     fileErrors,
     progressBarColor,
     licenseKey,
+    customTheme,
+    nativeNavigation,
 }) {
     let survey = null
     const UI_KEY = `surveyjs_ui_${statePath}`
 
     function applyTheme(mode) {
+        if (customTheme) {
+            survey.applyTheme(customTheme)
+            return
+        }
         const base = mode === 'dark' ? dark : light
         const theme = { ...base, cssVariables: { ...base.cssVariables } }
         if (panelless) theme.isPanelless = true
@@ -100,7 +106,7 @@ export default function surveyjsForm({
             if (locale) survey.locale = locale
 
             // Masquer la navigation native SurveyJS (remplacée par les boutons Filament)
-            survey.showNavigationButtons = false
+            if (!nativeNavigation) survey.showNavigationButtons = false
 
             // Barre de progression en pourcentage (layout element custom)
             if (progressBarPercent) {
@@ -121,6 +127,7 @@ export default function surveyjsForm({
                     options.files.forEach((file) =>
                         formData.append('files[]', file),
                     )
+                    formData.append('questionType', options.question.getType())
 
                     fetch(fileUploadUrl, {
                         method: 'POST',

@@ -32,7 +32,7 @@ trait HasSurveySignature
         return $json;
     }
 
-    private function applyPenColorToElements(array &$elements, string $color): void
+    protected function applyPenColorToElements(array &$elements, string $color): void
     {
         foreach ($elements as &$element) {
             if (($element['type'] ?? '') === 'signaturepad') {

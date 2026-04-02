@@ -3,10 +3,13 @@
 namespace JibayMcs\SurveyJs\Forms\Concerns;
 
 use Closure;
+use Illuminate\Contracts\View\View;
 
 trait HasSurveyJson
 {
     public ?array $surveyJson = [];
+
+    protected array $surveyOptions = [];
 
     protected ?bool $allFieldsRequired = null;
 
@@ -35,6 +38,35 @@ trait HasSurveyJson
     public function getLocale(): string
     {
         return $this->locale ?? config('survey-js.locale') ?? app()->getLocale();
+    }
+
+    public function completedHtml(string|Closure|View $html): static
+    {
+        if ($html instanceof Closure) {
+            $html = $this->evaluate($html);
+        }
+
+        if ($html instanceof View) {
+            $html = $html->render();
+        }
+
+        $this->surveyOptions['completedHtml'] = $html;
+
+        return $this;
+    }
+
+    public function option(string $key, mixed $value): static
+    {
+        $this->surveyOptions[$key] = $value;
+
+        return $this;
+    }
+
+    public function options(array $options): static
+    {
+        $this->surveyOptions = array_merge($this->surveyOptions, $options);
+
+        return $this;
     }
 
     public function allFieldsRequired(?bool $condition = true): static
@@ -83,6 +115,10 @@ trait HasSurveyJson
     {
         $json = $this->surveyJson ?? [];
 
+        if (! empty($this->surveyOptions)) {
+            $json = array_merge($json, $this->surveyOptions);
+        }
+
         if ($this->allFieldsRequired === true && isset($json['pages'])) {
             foreach ($json['pages'] as &$page) {
                 if (isset($page['elements'])) {
@@ -115,11 +151,9 @@ trait HasSurveyJson
             }
         }
 
-        if (method_exists($this, 'applySignaturePenColor')) {
-            $json = $this->applySignaturePenColor($json);
-        }
+        $json = $this->applySignaturePenColor($json);
 
-        if (property_exists($this, 'fileUploadEnabled') && $this->fileUploadEnabled && isset($json['pages'])) {
+        if ($this->fileUploadEnabled && isset($json['pages'])) {
             foreach ($json['pages'] as &$page) {
                 if (isset($page['elements'])) {
                     $this->applyStoreDataAsText($page['elements']);

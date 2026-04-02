@@ -8,6 +8,8 @@ trait HasSurveyNavigation
 
     public ?bool $showPrevButton = null;
 
+    public bool $nativeNavigation = false;
+
     public ?string $pageNextText = null;
 
     public ?string $pagePrevText = null;
@@ -77,6 +79,13 @@ trait HasSurveyNavigation
     public function completeButtonColor(string $color): static
     {
         $this->completeButtonColor = $color;
+
+        return $this;
+    }
+
+    public function nativeNavigation(bool $condition = true): static
+    {
+        $this->nativeNavigation = $condition;
 
         return $this;
     }

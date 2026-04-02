@@ -27,6 +27,8 @@
                 'failed' => __('survey-js::survey-js.upload.failed'),
             ]),
             licenseKey: @js(config('survey-js.license_key')),
+            customTheme: @js($field->getThemeJson()),
+            nativeNavigation: @js($field->nativeNavigation),
         })"
         wire:ignore
     >
@@ -51,7 +53,7 @@
             ></div>
         @endif
 
-        @if($field->showNavigationButtons !== false)
+        @if($field->showNavigationButtons !== false && !$field->nativeNavigation)
             <template x-if="!loading">
                 <div class="sjs-navigation">
                     {{-- Gauche : Précédent --}}
