@@ -12,9 +12,22 @@ class SurveyJSCreatorField extends Field
 
     protected string $view = 'survey-js::components.surveyjs-creator-field';
 
+    public static function isAvailable(): bool
+    {
+        return file_exists(__DIR__ . '/../../resources/dist/survey-js-creator.js');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (! static::isAvailable()) {
+            throw new \RuntimeException(
+                'SurveyJS Creator assets are not compiled. '
+                . 'Install the commercial dependencies first: '
+                . 'cd vendor/jibaymcs/survey-js && npm install survey-creator-core survey-creator-js && npm run build'
+            );
+        }
 
         $this->afterStateHydrated(function (SurveyJSCreatorField $component, $state): void {
             if ($state === null) {

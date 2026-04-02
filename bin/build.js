@@ -55,18 +55,33 @@ compile({
     console.log(`Build completed for survey-js-form.js`)
 })
 
-compile({
-    ...defaultOptions,
-    entryPoints: ['./resources/js/index-creator.js'],
-    outfile: './resources/dist/survey-js-creator.js',
-    alias: {
-        'react': 'survey-js-ui',
-        'react-dom': 'survey-js-ui',
-        'survey-react-ui': 'survey-js-ui',
-    },
-}).then(() => {
-    console.log(`Build completed for survey-js-creator.js`)
-})
+// Creator build — only if commercial deps are installed
+let hasCreatorDeps = false
+try {
+    await import('survey-creator-core')
+    hasCreatorDeps = true
+} catch {
+    console.log(`\n⚠ Skipping Creator build — survey-creator-core / survey-creator-js not installed.`)
+    console.log(`  To build the Creator, install the commercial dependencies first:`)
+    console.log(`  npm install survey-creator-core survey-creator-js\n`)
+}
+
+if (hasCreatorDeps) {
+    compile({
+        ...defaultOptions,
+        entryPoints: ['./resources/js/index-creator.js'],
+        outfile: './resources/dist/survey-js-creator.js',
+        alias: {
+            'react': 'survey-js-ui',
+            'react-dom': 'survey-js-ui',
+            'survey-react-ui': 'survey-js-ui',
+        },
+    }).then(() => {
+        console.log(`Build completed for survey-js-creator.js`)
+    })
+
+    compileCss('./resources/css/creator.css', './resources/dist/survey-creator.css')
+}
 
 // CSS build via PostCSS + Tailwind (pour supporter @apply comme Filament)
 async function compileCss(inputFile, outputFile) {

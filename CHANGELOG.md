@@ -39,3 +39,7 @@ All notable changes to `filament-surveyjs` will be documented in this file.
 - **Enums** — `CheckErrorsMode`, `ProgressBarLocation`, `QuestionType`
 - **Translations** — Upload error messages in English, French, and Spanish
 - **Config** — Comprehensive `config/survey-js.php` with all defaults
+
+### Licensing
+
+- **Creator as opt-in** — Creator npm dependencies (`survey-creator-core`, `survey-creator-js`) are `peerDependencies` (optional). Only the Form Field (MIT) is bundled. Users must install Creator deps separately with their own commercial license.

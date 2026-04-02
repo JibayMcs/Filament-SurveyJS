@@ -13,8 +13,18 @@
     },
     "dependencies": {
         "survey-core": "^2.5.17",
-        "survey-creator-core": "^2.5.17",
-        "survey-creator-js": "^2.5.18",
         "survey-js-ui": "^2.5.17"
+    },
+    "peerDependencies": {
+        "survey-creator-core": "^2.5.18",
+        "survey-creator-js": "^2.5.18"
+    },
+    "peerDependenciesMeta": {
+        "survey-creator-core": {
+            "optional": true
+        },
+        "survey-creator-js": {
+            "optional": true
+        }
     }
 }

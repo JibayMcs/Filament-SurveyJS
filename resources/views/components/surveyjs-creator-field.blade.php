@@ -4,7 +4,10 @@
 >
     <div
         x-load
-        x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref(id: 'survey-js-styles', package: 'jibaymcs/survey-js'))]"
+        x-load-css="[
+            @js(\Filament\Support\Facades\FilamentAsset::getStyleHref(id: 'survey-js-styles', package: 'jibaymcs/survey-js')),
+            @js(\Filament\Support\Facades\FilamentAsset::getStyleHref(id: 'survey-js-creator-styles', package: 'jibaymcs/survey-js')),
+        ]"
         x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc(id: 'survey-js-creator', package: 'jibaymcs/survey-js') }}"
         x-data="surveyjsCreator({
             state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$getStatePath()}')") }},

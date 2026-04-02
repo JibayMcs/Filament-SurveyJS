@@ -1,6 +1,5 @@
 @import "tailwindcss/theme" layer(theme);
 @import 'survey-core/survey-core.fontless.css';
-@import 'survey-creator-core/survey-creator-core.fontless.css';
 
 @custom-variant dark (&:is(.dark *));
 

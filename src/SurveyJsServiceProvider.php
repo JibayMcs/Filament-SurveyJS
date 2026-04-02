@@ -97,11 +97,23 @@ class SurveyJsServiceProvider extends PackageServiceProvider
      */
     protected function getAssets(): array
     {
-        return [
+        $assets = [
             Css::make('survey-js-styles', __DIR__ . '/../resources/dist/survey.css')->loadedOnRequest(),
             AlpineComponent::make('survey-js-form', __DIR__ . '/../resources/dist/survey-js-form.js'),
-            AlpineComponent::make('survey-js-creator', __DIR__ . '/../resources/dist/survey-js-creator.js'),
         ];
+
+        $creatorJsPath = __DIR__ . '/../resources/dist/survey-js-creator.js';
+        $creatorCssPath = __DIR__ . '/../resources/dist/survey-creator.css';
+
+        if (file_exists($creatorJsPath)) {
+            $assets[] = AlpineComponent::make('survey-js-creator', $creatorJsPath);
+        }
+
+        if (file_exists($creatorCssPath)) {
+            $assets[] = Css::make('survey-js-creator-styles', $creatorCssPath)->loadedOnRequest();
+        }
+
+        return $assets;
     }
 
     /**

@@ -299,6 +299,23 @@ SurveyJSFormField::make('survey_data')
 
 ## Creator Field — `SurveyJSCreatorField`
 
+> [!IMPORTANT]
+> The SurveyJS Creator is a **commercial product** that requires a [SurveyJS license](https://surveyjs.io/licensing). The Creator JS is **not bundled** with this plugin. You must install the Creator npm dependencies separately and build the assets yourself.
+
+### Creator Installation
+
+1. Navigate to the plugin directory and install the Creator dependencies:
+
+```bash
+cd vendor/jibaymcs/survey-js
+npm install survey-creator-core survey-creator-js
+npm run build
+```
+
+2. Ensure your `SURVEYJS_LICENSE_KEY` is set in `.env` (see [Installation](#installation)).
+
+The build script will detect the Creator dependencies and compile `survey-js-creator.js` alongside the Form assets. Without these dependencies, only the Form Field assets are built.
+
 ### Basic Usage
 
 ```php
