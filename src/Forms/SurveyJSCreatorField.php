@@ -24,8 +24,7 @@ class SurveyJSCreatorField extends Field
         if (! static::isAvailable()) {
             throw new \RuntimeException(
                 'SurveyJS Creator assets are not compiled. '
-                . 'Install the commercial dependencies first: '
-                . 'cd vendor/jibaymcs/survey-js && npm install survey-creator-core survey-creator-js && npm run build'
+                . 'Run: php artisan surveyjs:install-creator'
             );
         }
 

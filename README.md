@@ -17,7 +17,6 @@ A [SurveyJS](https://surveyjs.io) integration for [FilamentPHP v5](https://filam
 - PHP 8.2+
 - Laravel 11+
 - Filament v5
-- SurveyJS license key (for Creator and to remove the watermark in production)
 
 ## Installation
 
@@ -51,14 +50,6 @@ Optionally, publish the views:
 
 ```bash
 php artisan vendor:publish --tag="survey-js-views"
-```
-
-### License Key
-
-Add your SurveyJS license key to `.env`:
-
-```env
-SURVEYJS_LICENSE_KEY=your-license-key-here
 ```
 
 ---
@@ -304,17 +295,21 @@ SurveyJSFormField::make('survey_data')
 
 ### Creator Installation
 
-1. Navigate to the plugin directory and install the Creator dependencies:
-
 ```bash
-cd vendor/jibaymcs/survey-js
-npm install survey-creator-core survey-creator-js
-npm run build
+php artisan surveyjs:install-creator
 ```
 
-2. Ensure your `SURVEYJS_LICENSE_KEY` is set in `.env` (see [Installation](#installation)).
+This command installs the Creator npm dependencies and compiles the assets automatically.
 
-The build script will detect the Creator dependencies and compile `survey-js-creator.js` alongside the Form assets. Without these dependencies, only the Form Field assets are built.
+### License Key
+
+Add your SurveyJS license key to `.env`:
+
+```env
+SURVEYJS_LICENSE_KEY=your-license-key-here
+```
+
+The license key is required for the Creator and removes the SurveyJS watermark in production.
 
 ### Basic Usage
 

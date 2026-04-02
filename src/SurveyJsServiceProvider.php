@@ -121,7 +121,9 @@ class SurveyJsServiceProvider extends PackageServiceProvider
      */
     protected function getCommands(): array
     {
-        return [];
+        return [
+            Commands\InstallCreatorCommand::class,
+        ];
     }
 
     /**

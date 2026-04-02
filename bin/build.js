@@ -2,6 +2,7 @@ import esbuild from 'esbuild'
 import postcss from 'postcss'
 import tailwindcss from '@tailwindcss/postcss'
 import fs from 'fs/promises'
+import { existsSync } from 'fs'
 
 const isDev = process.argv.includes('--dev')
 
@@ -56,11 +57,9 @@ compile({
 })
 
 // Creator build — only if commercial deps are installed
-let hasCreatorDeps = false
-try {
-    await import('survey-creator-core')
-    hasCreatorDeps = true
-} catch {
+const hasCreatorDeps = existsSync('./node_modules/survey-creator-core') && existsSync('./node_modules/survey-creator-js')
+
+if (!hasCreatorDeps) {
     console.log(`\n⚠ Skipping Creator build — survey-creator-core / survey-creator-js not installed.`)
     console.log(`  To build the Creator, install the commercial dependencies first:`)
     console.log(`  npm install survey-creator-core survey-creator-js\n`)
