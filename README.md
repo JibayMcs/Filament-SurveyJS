@@ -89,6 +89,8 @@ The `survey()` method accepts an array, a JSON string, or a Closure:
 ->survey($surveyArray)
 ```
 
+> **Tip:** You can build your survey JSON for free using the [online Survey Creator](https://surveyjs.io/create-free-survey) — no license required. Export the JSON and pass it to `survey()`.
+
 ### Display Options
 
 ```php
