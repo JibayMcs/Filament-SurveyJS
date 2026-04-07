@@ -35,6 +35,19 @@
     --sjs-render-danger: #333333;
 }
 
+/* ── Theme: Yuzu ── */
+.sjs-render--yuzu {
+    --sjs-render-primary: #f59e0b;
+    --sjs-render-text: #1c1917;
+    --sjs-render-muted: #78716c;
+    --sjs-render-border: #e7e5e4;
+    --sjs-render-bg: #ffffff;
+    --sjs-render-bg-alt: #fafaf9;
+    --sjs-render-success: #16a34a;
+    --sjs-render-danger: #dc2626;
+    font-size: 13px;
+}
+
 /* ── Theme: Print ── */
 .sjs-render--print {
     --sjs-render-primary: #000000;

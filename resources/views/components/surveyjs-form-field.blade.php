@@ -41,7 +41,7 @@
         @if($field->contained)
             <fieldset class="fi-fieldset" x-show="!loading" x-cloak>
                 @if($field->containedWithTitle)
-                    <legend x-show="surveyTitle" x-text="surveyTitle"></legend>
+                    <legend x-show="surveyTitle && !isCompleted" x-text="surveyTitle"></legend>
                 @endif
                 <div x-ref="surveyContainer"></div>
             </fieldset>
@@ -54,7 +54,7 @@
         @endif
 
         @if($field->showNavigationButtons !== false && !$field->nativeNavigation)
-            <template x-if="!loading">
+            <template x-if="!loading && !isCompleted">
                 <div class="sjs-navigation">
                     {{-- Gauche : Précédent --}}
                     <div>

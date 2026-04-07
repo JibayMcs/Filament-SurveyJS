@@ -29,6 +29,8 @@ class SurveyRenderer
 
     protected string $unansweredText = '—';
 
+    protected array $viewData = [];
+
     protected ?string $storageDisk = null;
 
     protected string $dateFormat = 'L';
@@ -174,6 +176,13 @@ class SurveyRenderer
         return $this;
     }
 
+    public function viewData(array $data): static
+    {
+        $this->viewData = $data;
+
+        return $this;
+    }
+
     public function disk(?string $disk): static
     {
         $this->storageDisk = $disk;
@@ -232,7 +241,7 @@ class SurveyRenderer
 
     public function toView(): View
     {
-        return view('survey-js::rendering.survey', [
+        return view('survey-js::rendering.survey', array_merge([
             'survey' => $this->toArray(),
             'css' => $this->getCss(),
             'theme' => $this->theme,
@@ -245,7 +254,7 @@ class SurveyRenderer
             'headerView' => $this->headerView,
             'footerView' => $this->footerView,
             'unansweredText' => $this->unansweredText,
-        ]);
+        ], $this->viewData));
     }
 
     public function toResponse(): Response

@@ -37,7 +37,8 @@ class SurveyJSFormField extends Field
         $this->readOnly = config('survey-js.read_only', false);
         $this->locale = config('survey-js.locale');
 
-        $this->afterStateHydrated(function (SurveyJSFormField $component, $state): void {
+
+        $this->afterStateHydrated(static function (SurveyJSFormField $component, $state): void {
             if ($state === null) {
                 $component->state([]);
             }

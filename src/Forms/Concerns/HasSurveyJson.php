@@ -9,6 +9,8 @@ trait HasSurveyJson
 {
     public ?array $surveyJson = [];
 
+    protected Closure|null $surveyJsonResolver = null;
+
     protected array $surveyOptions = [];
 
     protected ?bool $allFieldsRequired = null;
@@ -17,8 +19,8 @@ trait HasSurveyJson
 
     public function survey(Closure|string|array|null $json): static
     {
-        if (is_callable($json)) {
-            $this->surveyJson = $this->evaluate($json);
+        if ($json instanceof Closure) {
+            $this->surveyJsonResolver = $json;
         } elseif (is_string($json)) {
             $this->surveyJson = json_decode($json, true);
         } else {
@@ -42,15 +44,11 @@ trait HasSurveyJson
 
     public function completedHtml(string|Closure|View $html): static
     {
-        if ($html instanceof Closure) {
-            $html = $this->evaluate($html);
+        if ($html instanceof Closure || $html instanceof View) {
+            $this->surveyOptions['completedHtmlResolver'] = $html;
+        } else {
+            $this->surveyOptions['completedHtml'] = $html;
         }
-
-        if ($html instanceof View) {
-            $html = $html->render();
-        }
-
-        $this->surveyOptions['completedHtml'] = $html;
 
         return $this;
     }
@@ -100,9 +98,25 @@ trait HasSurveyJson
         }
     }
 
+    protected function resolveSurveyJson(): array
+    {
+        if ($this->surveyJsonResolver !== null) {
+            $resolved = $this->evaluate($this->surveyJsonResolver);
+
+            if (is_string($resolved)) {
+                $resolved = json_decode($resolved, true);
+            }
+
+            $this->surveyJson = $resolved ?? [];
+            $this->surveyJsonResolver = null;
+        }
+
+        return $this->surveyJson ?? [];
+    }
+
     public function getSurveyTitle(): ?string
     {
-        $title = ($this->surveyJson ?? [])['title'] ?? null;
+        $title = $this->resolveSurveyJson()['title'] ?? null;
 
         if (is_array($title)) {
             return $title['default'] ?? reset($title) ?: null;
@@ -113,9 +127,24 @@ trait HasSurveyJson
 
     public function getSurveyJson(): array
     {
-        $json = $this->surveyJson ?? [];
+        $json = $this->resolveSurveyJson();
 
         if (! empty($this->surveyOptions)) {
+            if (isset($this->surveyOptions['completedHtmlResolver'])) {
+                $resolver = $this->surveyOptions['completedHtmlResolver'];
+                unset($this->surveyOptions['completedHtmlResolver']);
+
+                if ($resolver instanceof Closure) {
+                    $resolver = $this->evaluate($resolver);
+                }
+
+                if ($resolver instanceof View) {
+                    $resolver = $resolver->render();
+                }
+
+                $this->surveyOptions['completedHtml'] = $resolver;
+            }
+
             $json = array_merge($json, $this->surveyOptions);
         }
 

@@ -94,6 +94,7 @@ export default function surveyjsForm({
         loading: true,
         isFirstPage: true,
         isLastPage: false,
+        isCompleted: false,
         readOnly: readOnly ?? false,
         surveyTitle: '',
 
@@ -282,8 +283,36 @@ export default function surveyjsForm({
             })
 
             // Sync vers le state Livewire à chaque changement de valeur
+            let settingFromSurvey = false
             survey.onValueChanged.add(() => {
-                this.state = survey.data
+                settingFromSurvey = true
+                this.state = JSON.parse(JSON.stringify(survey.data))
+                this.$nextTick(() => {
+                    settingFromSurvey = false
+                })
+            })
+
+            // Protéger contre les réponses Livewire (entangle) qui écrasent
+            // this.state avec des données périmées. survey.data est la source de vérité.
+            this.$watch('state', (newState) => {
+                if (
+                    settingFromSurvey ||
+                    !survey ||
+                    this.isCompleted ||
+                    this.readOnly
+                )
+                    return
+                const surveyData = JSON.parse(JSON.stringify(survey.data))
+                if (
+                    JSON.stringify(newState) !==
+                    JSON.stringify(surveyData)
+                ) {
+                    settingFromSurvey = true
+                    this.state = surveyData
+                    this.$nextTick(() => {
+                        settingFromSurvey = false
+                    })
+                }
             })
 
             // Mise à jour de l'état de navigation au changement de page
@@ -299,8 +328,16 @@ export default function surveyjsForm({
             // Complétion : sync final avec marqueur, nettoyage localStorage
             // __surveyCompleted déclenche afterStateUpdated côté PHP
             survey.onComplete.add(() => {
-                this.state = { ...survey.data, __surveyCompleted: true }
+                settingFromSurvey = true
+                this.state = {
+                    ...JSON.parse(JSON.stringify(survey.data)),
+                    __surveyCompleted: true,
+                }
+                this.isCompleted = true
                 localStorage.removeItem(UI_KEY)
+                this.$nextTick(() => {
+                    settingFromSurvey = false
+                })
             })
 
             Alpine.effect(() => {

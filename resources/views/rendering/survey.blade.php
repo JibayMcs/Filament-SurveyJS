@@ -8,7 +8,7 @@
 </head>
 <body class="sjs-render sjs-render--{{ $theme }}">
     @if($showHeader)
-        @include($headerView ?? 'survey-js::rendering.header', ['survey' => $survey])
+        @include($headerView ?? 'survey-js::rendering.header')
     @endif
 
     @foreach($survey['pages'] as $pageIndex => $page)
@@ -24,7 +24,7 @@
     @endforeach
 
     @if($showFooter)
-        @include($footerView ?? 'survey-js::rendering.footer', ['survey' => $survey])
+        @include($footerView ?? 'survey-js::rendering.footer')
     @endif
 </body>
 </html>
