@@ -26,8 +26,26 @@ trait HasSurveyPersistence
         if ($key !== null) {
             return $key;
         }
+        // Try from form record
+        if ($record = $this->getRecord()) {
+            return $record->getKey();
+        }
 
-        return $this->getRecord()?->getKey();
+        // Fallback: try from Livewire component (Filament resource pages)
+        $livewire = $this->getLivewire();
+
+        if (method_exists($livewire, 'getRecord') && ($record = $livewire->getRecord())) {
+            return $record->getKey();
+        }
+
+        // Fallback: try from route parameter (Filament resource edit/view URLs)
+        $routeRecord = request()->route('record');
+
+        if ($routeRecord) {
+            return is_object($routeRecord) ? $routeRecord->getKey() : $routeRecord;
+        }
+
+        return null;
     }
 
     public function autoSave(?bool $condition = true, int $debounce = 500): static
