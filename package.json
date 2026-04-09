@@ -13,8 +13,8 @@
     },
     "dependencies": {
         "survey-core": "^2.5.17",
-        "survey-creator-core": "^2.5.18",
-        "survey-creator-js": "^2.5.18",
+        "survey-creator-core": "^2.5.19",
+        "survey-creator-js": "^2.5.19",
         "survey-js-ui": "^2.5.17"
     }
 }

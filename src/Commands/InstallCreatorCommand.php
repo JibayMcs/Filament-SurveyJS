@@ -18,6 +18,19 @@ class InstallCreatorCommand extends Command
         $this->info('Installing SurveyJS Creator...');
         $this->newLine();
 
+        // Check that we have the plugin's source files (package.json, bin/build.js)
+        if (! file_exists($packagePath . '/package.json')) {
+            $this->error('package.json not found in the plugin directory.');
+            $this->newLine();
+            $this->line('This command requires the plugin\'s source files.');
+            $this->line('If installed via Composer, reinstall with:');
+            $this->newLine();
+            $this->line('  <comment>composer require jibaymcs/survey-js --prefer-source</comment>');
+            $this->newLine();
+
+            return self::FAILURE;
+        }
+
         // Check npm
         if (! $this->commandExists('npm')) {
             $this->error('npm is not installed. Please install Node.js and npm first.');
@@ -30,7 +43,7 @@ class InstallCreatorCommand extends Command
             $this->warn('node_modules not found. Running npm install first...');
             $this->newLine();
 
-            if (! $this->runProcess(['npm', 'install'], $packagePath)) {
+            if (! $this->runProcess(['npm', 'install', '--legacy-peer-deps'], $packagePath)) {
                 return self::FAILURE;
             }
         }
@@ -38,7 +51,7 @@ class InstallCreatorCommand extends Command
         // Install Creator deps
         $this->info('Installing survey-creator-core and survey-creator-js...');
 
-        if (! $this->runProcess(['npm', 'install', 'survey-creator-core', 'survey-creator-js'], $packagePath)) {
+        if (! $this->runProcess(['npm', 'install', '--legacy-peer-deps', 'survey-creator-core', 'survey-creator-js'], $packagePath)) {
             return self::FAILURE;
         }
 
@@ -53,6 +66,7 @@ class InstallCreatorCommand extends Command
         // Verify
         if (! file_exists($packagePath . '/resources/dist/survey-js-creator.js')) {
             $this->error('Build completed but survey-js-creator.js was not generated.');
+            $this->line('Expected output at: <comment>' . $packagePath . '/resources/dist/survey-js-creator.js</comment>');
 
             return self::FAILURE;
         }
