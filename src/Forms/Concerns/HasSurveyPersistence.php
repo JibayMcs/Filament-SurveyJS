@@ -10,6 +10,26 @@ trait HasSurveyPersistence
 
     protected bool $versionOnEveryChange = false;
 
+    protected string|int|\Closure|null $recordKey = null;
+
+    public function recordKey(string|int|\Closure|null $key): static
+    {
+        $this->recordKey = $key;
+
+        return $this;
+    }
+
+    public function getRecordKey(): string|int|null
+    {
+        $key = $this->evaluate($this->recordKey);
+
+        if ($key !== null) {
+            return $key;
+        }
+
+        return $this->getRecord()?->getKey();
+    }
+
     public function autoSave(?bool $condition = true, int $debounce = 500): static
     {
         $this->autoSaveEnabled = $condition;

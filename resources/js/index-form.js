@@ -64,9 +64,10 @@ export default function surveyjsForm({
     licenseKey,
     customTheme,
     nativeNavigation,
+    recordKey,
 }) {
     let survey = null
-    const UI_KEY = `surveyjs_ui_${statePath}`
+    const UI_KEY = `surveyjs_ui_${statePath}${recordKey ? `_${recordKey}` : ''}`
 
     function applyTheme(mode) {
         if (customTheme) {

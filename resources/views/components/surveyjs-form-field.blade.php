@@ -29,6 +29,7 @@
             licenseKey: @js(config('survey-js.license_key')),
             customTheme: @js($field->getThemeJson()),
             nativeNavigation: @js($field->nativeNavigation),
+            recordKey: @js($field->getRecordKey()),
         })"
         wire:ignore
     >
